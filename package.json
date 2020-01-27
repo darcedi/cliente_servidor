@@ -1,19 +1,24 @@
 {
-  "name": "generator",
-  "version": "0.0.0",
-  "private": true,
-  "scripts": {
-    "start": "node ./bin/www"
-  },
-  "dependencies": {
-    "cookie-parser": "~1.4.4",
-    "debug": "~2.6.9",
-    "ejs": "~2.6.1",
-    "express": "~4.16.1",
-    "http-errors": "~1.6.3",
-    "morgan": "~1.9.1"
-  },
-  "devDependencies": {
-    "nodemon": "^2.0.2"
-  }
+    "name": "generator",
+    "version": "0.0.0",
+    "private": true,
+    "scripts": {
+        "start": "node ./bin/www",
+        "devstart": "nodemon ./bin/www",
+        "serverstart": "DEBUG=generator:* npm run devstart"
+    },
+    "dependencies": {
+        "boostrap": "^2.0.0",
+        "bootstrap": "^4.4.1",
+        "cookie-parser": "~1.4.4",
+        "debug": "~2.6.9",
+        "ejs": "~2.6.1",
+        "express": "~4.16.1",
+        "http-errors": "~1.6.3",
+        "mongoose": "^5.8.9",
+        "morgan": "~1.9.1"
+    },
+    "devDependencies": {
+        "nodemon": "^2.0.2"
+    }
 }
