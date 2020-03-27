@@ -10,4 +10,6 @@ router.get('/buena_onda', function(req, res) {
   res.render('alumnos',{numero:'todos menos el oscar'});
 });
 
+
+
 module.exports = router;

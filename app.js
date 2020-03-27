@@ -4,7 +4,10 @@ var mongoose = require('mongoose')
 var path = require('path');
 var cookieParser = require('cookie-parser');
 var logger = require('morgan');
+var methodOverride = require('method-override');
+var cors = require('cors');
 
+var apiRouter = require('./routes/api');
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
 
@@ -17,12 +20,18 @@ mongoose.connect("mongodb://localhost:27017/zombie_schoolA");
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'ejs');
 app.use('/css', express.static(__dirname + '/node_modules/bootstrap/dist/css'))
+app.use('/fontawesome', express.static(__dirname + '/node_modules/@fortawesome/fontawesome-free'))
+app.use('/js', express.static(__dirname + '/node_modules/bootstrap/dist/js'))
+app.use('/jquery', express.static(__dirname + '/node_modules/jquery/dist'))
 app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(methodOverride('_method'));
+app.use(cors());
 
+app.use('/api',apiRouter);
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
 

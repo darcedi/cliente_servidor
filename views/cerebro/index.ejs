@@ -8,56 +8,56 @@
             <h1>
                 <%= title %>
             </h1>
-            <p>Esta vista es de la página principal</p>
-            <h2>Lista de zombies</h2>
+            <p>Esta vista es de la página de cerebros</p>
+            <h2>Lista de Cerebros</h2>
             <table class="table table-dark">
                 <tr>
-                    <th>Nombre</th>
-                    <th>Email</th>
-                    <th>Tipo</th>
+                    <th>Flavor</th>
+                    <th>Description</th>
+                    <th>IQ</th>
+                    <th>Picture</th>
                     <th>Acciones</th>
+                    <th></th>
                 </tr>
                 <%
-      if(coleccion)
-      {
-        coleccion.forEach(function(zombie)
-        {%>
+  if(coleccion)
+  {
+    coleccion.forEach(function(cerebro)
+    {%>
                     <tr>
                         <td>
-                            <%= zombie.name %>
+                            <%= cerebro.flavor %>
                         </td>
                         <td>
-                            <%= zombie.email %>
+                            <%= cerebro.description %>
                         </td>
                         <td>
-                            <%= zombie.type %>
+                            <%= cerebro.iq %>
                         </td>
                         <td>
-                            <a href="/zombies/edit/<%= zombie.id %>">
+                            <%= cerebro.picture %>
+                        </td>
+                        <td>
+                            <a href="/cerebros/edit/<%= cerebro.id %>">
                                 <i class="fas fa-edit" title="Editar"></i>
                             </a>
-                            <a href="/zombies/delete/<%= zombie.id %>">
+                            <a href="/cerebros/delete/<%= cerebro.id %>">
                                 <i class="fas fa-trash text-danger" title="Eliminar"></i>
                             </a>
 
                         </td>
                     </tr>
-                    <%
-          }); } 
-          
-          %>
+                    <%}); } %>
 
             </table>
 
-            <a href="/zombies/add" class="btn btn-primary">
-                Agregar Zombie<i class="fas fa-plus text-light"></i>
+            <a href="/cerebros/add" class="btn btn-primary">
+                Agregar Cerebro<i class="fas fa-plus text-light"></i>
             </a>
-
             <script src="/jquery/jquery.min.js"></script>
             <script src="/js/bootstrap.min.js"></script>
 
-            <%if (alert!=0) {
-                %>
+            <%if (alert!=0) {%>
                 <script type="text/javascript">
                     $('#close').click(function() {
                         $('#Alert').hide('fade');

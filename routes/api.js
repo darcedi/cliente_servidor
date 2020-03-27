@@ -1,27 +1,31 @@
-var express = require('express');
-var router = express.Router();
+let express = require('express');
+let router = express.Router();
 
-var Zombie = require("../models/zombie")
-var Cerebro = require("../models/cerebro")
-var Usuario = require("../models/usuario")
+let Zombie = require('../models/zombie');
+let Cerebro = require('../models/cerebro');
+let Usuario = require("../models/usuario");
 
-/* GET home page. */
-
+var bcrypt = require('bcrypt');
+const saltRounds = 10;
 
 //Zombies
 
-router.get('/', function(req, res) {
-    listadoZombies(0, "", req, res);
+router.get('/zombies', async(req,res) => {
+    Zombie.find().exec((error,zombies) => {
+        if(!error)
+        {
+            res.status(200).json(zombies);
+        }
+        else
+        {
+            res.status(500).json(error);
+        }
+    });
 });
 
-//Añadir
-router.get('/zombies/add', function(req, res) {
-    res.render('add', { alert: 0, color: "" })
-});
-
+//Add
 
 router.post('/zombies/new', function(req, res) {
-    var zombie = req;
     var data = req.body;
     var nuevoZombie = new Zombie({
         name: data.name,
@@ -30,10 +34,10 @@ router.post('/zombies/new', function(req, res) {
     });
     var json = [];
     var id = 0;
-    if (nuevoZombie.name == "" || nuevoZombie.type == "") {
+    if (nuevoZombie.name == "" || nuevoZombie.name == undefined || nuevoZombie.type == "" || nuevoZombie.type == undefined) {
         id++;
         json.push({ "mensaje": "No has llenado todos los datos, intenta de nuevo.", "id": id });
-        res.render('add', { alert: json, color: "alert-danger" })
+        res.status(500).json({ mensajeError: json });
     } else {
         nuevoZombie.save(function(error) {
             if (error) {
@@ -50,7 +54,7 @@ router.post('/zombies/new', function(req, res) {
                     id++;
                     json.push({ "mensaje": "Tipo de zombie no valido", "id": id });
                 }
-                res.render('add', { alert: json, color: "alert-danger" })
+                res.status(500).json({ mensajeError: json });
             } else {
                 listadoZombies("Zombie insertado correctamente", "alert-success", req, res);
             }
@@ -59,11 +63,6 @@ router.post('/zombies/new', function(req, res) {
 });
 
 //Editar
-
-router.get('/zombies/edit/:id', async function(req, res) {
-    var zombie = await Zombie.findById(req.params.id);
-    res.render('edit', { zombie: zombie, alert: 0, color: "" });
-});
 
 router.put('/zombies/edit/:id', async function(req, res) {
     var json = [];
@@ -88,16 +87,11 @@ router.put('/zombies/edit/:id', async function(req, res) {
             id++;
             json.push({ "mensaje": "Tipo de zombie no valido", "id": id });
         }
-        res.render('edit', { zombie: zombie, alert: json, color: "alert-danger" })
+        res.status(500).json({ mensajeError: json, mensajeExito:''});
     }
 });
 
 //Eliminar
-
-router.get('/zombies/delete/:id', async function(req, res) {
-    var zombie = await Zombie.findById(req.params.id);
-    res.render('delete', { zombie: zombie, alert: 0, color: "" });
-});
 
 router.delete('/zombies/delete/:id', async function(req, res) {
     try {
@@ -106,22 +100,35 @@ router.delete('/zombies/delete/:id', async function(req, res) {
         listadoZombies("Zombie eliminado correctamente", "alert-success", req, res);
 
     } catch (e) {
-        res.render('delete', { zombie: zombie, alert: e, color: "alert-danger" })
+        res.status(500).json({ mensajeError: e, mensajeExito:''});
     }
 });
 
-//Cerebro
+function listadoZombies(_alert, _color, req, res) {
+    Zombie.find().exec(function(error, Zombies) {
+        if (!error) {
+            console.log(Zombies);
+            res.status(200).json({mensajeError:'', mensajeExito: _alert});
+        }
+    });
+}
 
-router.get('/cerebros', function(req, res, next) {
-    listadoCerebros(0, "", req, res);
+//Cerebros
+
+router.get('/cerebros', async(req,res) => {
+    Cerebro.find().exec((error,cerebros) => {
+        if(!error)
+        {
+            res.status(200).json(cerebros);
+        }
+        else
+        {
+            res.status(500).json(error);
+        }
+    });
 });
 
 //Add
-
-router.get('/cerebros/add', function(req, res) {
-    res.render('cerebro/add', { alert: 0, color: "" })
-});
-
 
 router.post('/cerebros/new', function(req, res) {
     var cerebro = req;
@@ -134,7 +141,7 @@ router.post('/cerebros/new', function(req, res) {
     });
     var json = [];
     var id = 0;
-    if (nuevoCerebro.flavor == "" || nuevoCerebro.description == "") {
+    if (nuevoCerebro.flavor == "" || nuevoCerebro.description == "" || nuevoCerebro.flavor == undefined || nuevoCerebro.description == undefined) {
         id++;
         json.push({ "mensaje": "No has llenado todos los datos, intenta de nuevo.", "id": id });
         res.render('cerebro/add', { alert: json, color: "alert-danger" })
@@ -159,7 +166,7 @@ router.post('/cerebros/new', function(req, res) {
                     id++;
                     json.push({ "mensaje": "Imagen no seleccionada", "id": id });
                 }
-                res.render('cerebro/add', { alert: json, color: "alert-danger" })
+                res.status(500).json({ mensajeError: json });
             } else {
                 listadoCerebros("Cerebro insertado correctamente", "alert-success", req, res);
             }
@@ -168,11 +175,6 @@ router.post('/cerebros/new', function(req, res) {
 });
 
 //Editar
-
-router.get('/cerebros/edit/:id', async function(req, res) {
-    var cerebro = await Cerebro.findById(req.params.id);
-    res.render('cerebro/edit', { cerebro: cerebro, alert: 0, color: "" });
-});
 
 router.put('/cerebros/edit/:id', async function(req, res) {
     var json = [];
@@ -202,16 +204,11 @@ router.put('/cerebros/edit/:id', async function(req, res) {
             id++;
             json.push({ "mensaje": "Imagen no seleccionada", "id": id });
         }
-        res.render('cerebro/edit', { cerebro: cerebro, alert: json, color: "alert-danger" });
+        res.status(500).json({ mensajeError: json });
     }
 });
 
 //Eliminar
-
-router.get('/cerebros/delete/:id', async function(req, res) {
-    var cerebro = await Cerebro.findById(req.params.id);
-    res.render('cerebro/delete', { cerebro: cerebro, alert: 0, color: "" });
-});
 
 router.delete('/cerebros/delete/:id', async function(req, res) {
     try {
@@ -219,119 +216,104 @@ router.delete('/cerebros/delete/:id', async function(req, res) {
         cerebro.delete();
         listadoCerebros("Cerebro eliminado correctamente", "alert-success", req, res);
     } catch (e) {
-        res.render('cerebro/delete', { cerebro: cerebro, alert: e, color: "alert-danger" })
+        res.status(500).json({ mensajeError: e, mensajeExito:''});
     }
 });
-
-//Prueba
-
-router.get('/prueba', function(req, res) {
-    res.send('<h1>Esto es una prueba.</h1>');
-});
-
-
 
 function listadoCerebros(_alert, _color, req, res) {
     Cerebro.find().exec(function(error, Cerebros) {
         if (!error) {
             console.log(Cerebros);
-            res.render('cerebro/index', { title: 'Cerebros', coleccion: Cerebros, alert: _alert, color: _color });
+            res.status(200).json({mensajeError:'', mensajeExito: _alert});
         }
     });
 }
 
-function listadoZombies(_alert, _color, req, res) {
-    Zombie.find().exec(function(error, Zombies) {
-        if (!error) {
-            console.log(Zombies);
-            res.render('index', { title: 'Zombies', coleccion: Zombies, alert: _alert, color: _color });
-        }
-    });
-}
+//Usuarios
 
-//usuarios
-
-router.get('/users/', function(req, res, next) {
-    indexLogin(0, "", req, res);
-});
+//Login
 
 router.post('/users/login', function(req, res) {
     var data = req.body;
     var usuario = new Usuario({
-        username: data.user,
-        password: data.pass
+        username: data.username,
+        password: data.password
     });
+    
     console.log(usuario.username);
     console.log(usuario.password);
-    Usuario.findOne({username:usuario.username, password:usuario.password}).exec(function(error, Usuarios) {
+    Usuario.findOne({username:usuario.username}).exec(function(error, _usuario) {
         if (!error) {
-            console.log(Usuarios);
-            if (Usuarios != null)
+            console.log(_usuario);
+            if (_usuario == null)
             {
-                listadoZombies(0, "", req, res);
+                indexLogin("Usuario incorrecto", "alert-danger", req, res);
             }
             else
             {
-                indexLogin("Usuario o contraseña incorrecto", "alert-danger", req, res);
+                bcrypt.compare(usuario.password, _usuario.password, function(error, result) {
+                    if(result){
+                      res.status(200).json({mensajeError:'', mensajeExito: _usuario.porfilePhoto});
+                    } else {
+                      res.status(500).json({mensajeError:'Contraseña incorrecta', mensajeExito: ''});
+                    }
+                  });
             }
         }
         else
         {
-            console.log(error);
+            res.status(500).json({ mensajeError: error, mensajeExito:''});
         }
     });
 });
 
-//add
-router.get('/users/add', function(req, res) {
-    res.render('login/add', { alert: 0, color: "" })
-});
-
-
+//Register
 
 router.post('/users/new', function(req, res) {
     var user = req;
     var data = req.body;
-    var nuevoUser = new Usuario({
-        username: data.user,
-        password: data.pass,
-        email: data.email
-    });
-    console.log(nuevoUser);
-    var json = [];
-    var id = 0;
-    if (nuevoUser.username == "" || nuevoUser.password == "") {
-        id++;
-        json.push({ "mensaje": "No has llenado todos los datos, intenta de nuevo.", "id": id });
-        res.render('login/add', { alert: json, color: "alert-danger" })
-
-    } else {
-        nuevoUser.save(function(error) {
-            if (error) {
-
-                if (error.errors.username) {
-                    id++;
-                    json.push({ "mensaje": error.errors.username.message, "id": id });
-                }
-                if (error.errors.password) {
-                    id++;
-                    json.push({ "mensaje": error.errors.password.message, "id": id });
-                }
-                if (error.errors.email) {
-                    id++;
-                    json.push({ "mensaje": error.errors.email.message, "id": id });
-                }
-                res.render('users/add', { alert: json, color: "alert-danger" })
-            } else {
-                indexLogin("Usuario registrado correctamente", "alert-success", req, res);
-            }
+    bcrypt.hash(data.password, saltRounds, function (err,   hash) {
+        var nuevoUser = new Usuario({
+            username: data.username,
+            password: hash,
+            email: data.email
         });
-    }
+        console.log(nuevoUser);
+        var json = [];
+        var id = 0;
+        if (nuevoUser.username == undefined || nuevoUser.password == undefined || nuevoUser.username == "" || nuevoUser.password == "") {
+            id++;
+            json.push({ "mensaje": "No has llenado todos los datos, intenta de nuevo.", "id": id });
+            res.status(500).json({ mensajeError: json, mensajeExito:''});
+    
+        } else {
+            nuevoUser.save(function(error) {
+                if (error) {
+    
+                    if (error.errors.username) {
+                        id++;
+                        json.push({ "mensaje": error.errors.username.message, "id": id });
+                    }
+                    if (error.errors.password) {
+                        id++;
+                        json.push({ "mensaje": error.errors.password.message, "id": id });
+                    }
+                    if (error.errors.email) {
+                        id++;
+                        json.push({ "mensaje": error.errors.email.message, "id": id });
+                    }
+                    res.status(500).json({ mensajeError: json, mensajeExito:''});
+                } else {
+                    res.status(200).json({ mensajeError: "", mensajeExito:'Usuario registrado correctamente'});
+                }
+            });
+        }
+    });
+    
 });
 
 function indexLogin(_alert, _color, req, res) { 
-    res.render('login/index', { title: 'Users', alert: _alert, color: _color });
+    res.status(500).json({mensajeError:_alert, mensajeExito: ''});
 }
 
 module.exports = router;
-
