@@ -253,7 +253,7 @@ router.post('/users/login', function(req, res) {
             {
                 bcrypt.compare(usuario.password, _usuario.password, function(error, result) {
                     if(result){
-                      res.status(200).json({mensajeError:'', mensajeExito: _usuario.porfilePhoto});
+                      res.status(200).json({mensajeError:'', mensajeExito: 'success'});
                     } else {
                       res.status(500).json({mensajeError:'Contraseña incorrecta', mensajeExito: ''});
                     }
